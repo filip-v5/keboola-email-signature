@@ -110,7 +110,7 @@
     <label for="meeting">Optional: Book a meeting with me (paste your meeting link):</label>
     <input type="text" id="meeting" placeholder="https://your-meeting-link.com" oninput="updateLinkInPreview('meeting', this.value)">
 
-    <label for="linkedin">Optional: Connect with me on LinkedIn (paste your LinkedIn profile URL):</label>
+    <label for="linkedin">Optional: Paste your LinkedIn profile URL:</label>
     <input type="text" id="linkedin" placeholder="https://www.linkedin.com/in/yourprofile" oninput="updateLinkInPreview('linkedin', this.value)">
 
     <label for="promo-image-selector">Select an Image Banner:</label>
@@ -171,6 +171,8 @@
         var name = document.getElementById('preview-name').textContent;
         var baseKeboolaLink = "https://www.keboola.com/?utm_source=email&utm_medium=email-signature&utm_campaign=";
         var keboolaLink = baseKeboolaLink + encodeURIComponent(selector.options[selector.selectedIndex].textContent) + "&utm_id=" + encodeURIComponent(name);
+
+// BANNER SELECTION
 
         switch(selector.value) {
             case "logo-only":
