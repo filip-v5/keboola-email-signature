@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keboola Email Signature Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #F4F7FA; /* Keboola's light background color */
+            color: #333; /* Primary text color */
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .form-section {
+            flex-basis: 40%;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+        }
+        .form-section label {
+            display: block;
+            margin-bottom: 5px;
+            color: #5B6978;
+        }
+        .form-section input, .form-section select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #D3DCE6;
+            border-radius: 4px;
+            font-family: 'Roboto', sans-serif;
+        }
+        .preview-section {
+            flex-basis: 50%;
+        }
+        .email-signature {
+            font-size: 11pt;
+            color: #333;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'Roboto', sans-serif;
+        }
+        .promo-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .promo-link {
+            display: block;
+        }
+        button {
+            display: block;
+            width: calc(100% - 20px);
+            padding: 10px 0;
+            background-color: #007D8A;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            font-family: 'Roboto', sans-serif;
+        }
+        .help-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            font-family: 'Roboto', sans-serif;
+        }
+        .signature-details p {
+            margin: 2px 0; /* Reduced spacing between Name and Role */
+            font-family: 'Roboto', sans-serif;
+        }
+        .signature-details strong {
+            display: block; /* Ensures 'Keboola' appears on a new line */
+            font-weight: 700;
+        }
+        .gif-container {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .gif-container img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-section">
+    <label for="name">Enter your name:</label>
+    <input type="text" id="name" placeholder="John Doe" oninput="updatePreview('name', this.value)">
+    
+    <label for="role">Enter your job title:</label>
+    <input type="text" id="role" placeholder="Data Analyst" oninput="updatePreview('role', this.value)">
+    
+    <label for="phone">Phone number including country code:</label>
+    <input type="text" id="phone" placeholder="+1 234 567 8900" oninput="updatePreview('phone', this.value)">
+
+    <label for="meeting">Optional: Book a meeting with me (paste your meeting link):</label>
+    <input type="text" id="meeting" placeholder="https://your-meeting-link.com" oninput="updateLinkInPreview('meeting', this.value)">
+
+    <label for="linkedin">Optional: Connect with me on LinkedIn (paste your LinkedIn profile URL):</label>
+    <input type="text" id="linkedin" placeholder="https://www.linkedin.com/in/yourprofile" oninput="updateLinkInPreview('linkedin', this.value)">
+
+    <label for="promo-image-selector">Select an Image Banner:</label>
+    <select id="promo-image-selector" onchange="updatePromoImage()">
+        <option value="logo-only">Logo only</option>
+        <option value="no-image">No image</option>
+        <option value="empower-spring">Watch EmPower Spring '24</option>
+        <option value="g2-reviews">Read our G2 reviews</option>
+        <option value="financial-intelligence">Financial Intelligence solution</option>
+    </select>
+</div>
+
+<div class="preview-section">
+    <div id="signature-preview" class="email-signature">
+        <div class="signature-details">
+            <p><strong id="preview-name">Name</strong></p>
+            <p id="preview-role">Job Title</p>
+            <p><a href="" id="company-link" target="_blank">Keboola</a></p><br/>
+            <p id="preview-phone" style="display: none;">Phone</p>
+            <p id="preview-meeting" style="display: none;"><a id="meeting-link" href="" target="_blank">Book a call with me</a></p>
+            <p id="preview-linkedin" style="display: none;">Connect with me on <a id="linkedin-link" href="" target="_blank">LinkedIn</a></p>
+        </div>
+        <a id="promo-link" href="" target="_blank" class="promo-link">
+            <img src="https://uploads-ssl.webflow.com/5e21dc6f4c5acf29c35bb32c/669f60281f2ce0f05515e9e8_Keboola-logo-300.jpg" alt="Promo Image" class="promo-image" id="promo-image">
+        </a>
+    </div>
+    <button id="copy-button" onclick="copyToClipboard()">Copy Signature</button>
+    <div class="gif-container" id="gif-container">
+        <img src="https://storage.googleapis.com/support-kms-prod/yL4gtsrPqsbSYvjhIboxiUu7sW6TAIcih7Yc" alt="How to set your signature in Gmail">
+        <a href="https://support.google.com/mail/answer/8395?hl=en-GB&co=GENIE.Platform%3DDesktop" class="help-link" target="_blank">How to set your signature in Gmail</a>
+    </div>
+</div>
+
+<script>
+    function updatePreview(fieldId, value) {
+        var previewElement = document.getElementById('preview-' + fieldId);
+        previewElement.textContent = value;
+        if (fieldId === 'phone') {
+            previewElement.style.display = value ? 'block' : 'none';
+        }
+        updateCompanyLink();
+    }
+
+    function updateLinkInPreview(fieldId, value) {
+        var linkElement = document.getElementById(fieldId + '-link');
+        if (!value.startsWith("https://www.")) {
+            value = "https://www." + value.replace(/^https?:\/\//, '').replace(/^www\./, '');
+        }
+        document.getElementById('preview-' + fieldId).style.display = value ? "block" : "none";
+        linkElement.href = value;
+        linkElement.textContent = fieldId === 'meeting' ? "Book a call with me" : "LinkedIn";
+    }
+
+    function updatePromoImage() {
+        var selector = document.getElementById("promo-image-selector");
+        var img = document.getElementById("promo-image");
+        var link = document.getElementById("promo-link");
+        var name = document.getElementById('preview-name').textContent;
+        var baseKeboolaLink = "https://www.keboola.com/?utm_source=email&utm_medium=email-signature&utm_campaign=";
+        var keboolaLink = baseKeboolaLink + encodeURIComponent(selector.options[selector.selectedIndex].textContent) + "&utm_id=" + encodeURIComponent(name);
+
+        switch(selector.value) {
+            case "logo-only":
+                img.src = "https://uploads-ssl.webflow.com/5e21dc6f4c5acf29c35bb32c/669f60281f2ce0f05515e9e8_Keboola-logo-300.jpg";
+                link.href = keboolaLink;
+                img.style.display = "block";
+                link.style.display = "block";
+                break;
+            case "no-image":
+                img.style.display = "none";
+                link.style.display = "none";
+                break;
+            case "empower-spring":
+                img.src = "https://uploads-ssl.webflow.com/5e21dc6f4c5acf29c35bb32c/669f98a5cad0339ea1a9430e_Empower%20Email%20banner-300.jpg";
+                link.href = "https://www.keboola.com/webinars/empower-online-may-2024" + "?utm_source=email&utm_medium=email-signature&utm_campaign=" + encodeURIComponent(selector.options[selector.selectedIndex].textContent) + "&utm_id=" + encodeURIComponent(name);
+                img.style.display = "block";
+                link.style.display = "block";
+                break;
+            case "g2-reviews":
+                img.src = "https://uploads-ssl.webflow.com/5e21dc6f4c5acf29c35bb32c/669f79591bb81b23f76ad254_G2%20reviews%20banner-300.jpg";
+                link.href = "https://www.g2.com/products/keboola/reviews";
+                img.style.display = "block";
+                link.style.display = "block";
+                break;
+            case "financial-intelligence":
+                img.src = "https://uploads-ssl.webflow.com/5e21dc6f4c5acf29c35bb32c/669f9b1adfbfede21688a3d3_Financial%20Intelligence-300.jpg";
+                link.href = "https://www.keboola.com/solutions/financial-intelligence" + "?utm_source=email&utm_medium=email-signature&utm_campaign=" + encodeURIComponent(selector.options[selector.selectedIndex].textContent) + "&utm_id=" + encodeURIComponent(name);
+                img.style.display = "block";
+                link.style.display = "block";
+                break;
+            default:
+                img.style.display = "none";
+                link.style.display = "none";
+        }
+    }
+
+    function updateCompanyLink() {
+        var name = document.getElementById('preview-name').textContent;
+        var campaign = document.getElementById("promo-image-selector").selectedOptions[0].textContent;
+        var link = "https://www.keboola.com/?utm_source=email&utm_medium=email-signature&utm_campaign=" + encodeURIComponent(campaign) + "&utm_id=" + encodeURIComponent(name);
+        document.getElementById("company-link").href = link;
+        updatePromoImage();
+    }
+
+    function copyToClipboard() {
+        var range = document.createRange();
+        range.selectNode(document.getElementById("signature-preview"));
+        window.getSelection().removeAllRanges(); // Clear current selection
+        window.getSelection().addRange(range); // Select the text
+        document.execCommand("copy"); // Execute copy command
+        window.getSelection().removeAllRanges(); // Clear selection
+        var copyButton = document.getElementById("copy-button");
+        copyButton.textContent = "Copied to clipboard 👍";
+        var gifContainer = document.getElementById("gif-container");
+        gifContainer.style.display = "block";
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePromoImage(); // Initialize with the default image banner
+    });
+</script>
+
+</body>
+</html>
